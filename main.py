@@ -6,6 +6,9 @@ import jwt
 from supabase import create_client, Client
 
 app = FastAPI(title="MovieReviews FastAPI + Supabase")
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "MovieReviews API funcionando correctamente"}
 
 # -------------------------
 # CONFIGURACIÓN DE VARIABLES DE ENTORNO
