@@ -13,7 +13,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "secreto_desarrollo")
 ALGORITHM = "HS256"
 
 
-def verify_admin(
+def verify_admin_or_auditor(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> int:
     """Valida el JWT y comprueba que el usuario autenticado sea admin."""
@@ -39,7 +39,8 @@ def verify_admin(
         .execute()
     )
 
-    if not result.data or str(result.data[0].get("usuario", "")).lower() != "admin":
+    role_name = str(result.data[0].get("usuario", "")).strip().lower() if result.data else ""
+    if role_name not in {"admin", "auditor"}:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes permisos de administrador",
@@ -49,7 +50,7 @@ def verify_admin(
 
 
 @router.get("/users")
-def get_users(_: int = Depends(verify_admin)) -> List[Dict[str, Any]]:
+def get_users(_: int = Depends(verify_admin_or_auditor)) -> List[Dict[str, Any]]:
     """Devuelve usuarios sin exponer contraseñas."""
     supabase = get_supabase_client()
     result = (
@@ -71,7 +72,7 @@ def get_users(_: int = Depends(verify_admin)) -> List[Dict[str, Any]]:
 
 
 @router.get("/carts")
-def get_carts(_: int = Depends(verify_admin)) -> List[Dict[str, Any]]:
+def get_carts(_: int = Depends(verify_admin_or_auditor)) -> List[Dict[str, Any]]:
     """Devuelve el historial de carritos para el panel de administración."""
     supabase = get_supabase_client()
     result = (
