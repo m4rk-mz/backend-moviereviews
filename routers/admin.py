@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from database import get_supabase_client
 
-router = APIRouter(tags=["Admin"])
+router = APIRouter(prefix="/admin", tags=["Admin"])
 security = HTTPBearer()
 SECRET_KEY = os.environ.get("SECRET_KEY", "secreto_desarrollo")
 ALGORITHM = "HS256"

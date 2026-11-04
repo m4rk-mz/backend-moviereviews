@@ -31,6 +31,34 @@ def get_products():
         ))
     return products
 
+@router.get("/categories", response_model=List[str])
+def get_categories():
+    """Lista las categorías distintas del catálogo (sin repetir)."""
+    supabase = get_supabase_client()
+    res = supabase.table("products").select("category").execute()
+    categories = sorted({str(item.get("category") or "").strip() for item in res.data} - {""})
+    return categories
+
+@router.get("/category/{category}", response_model=List[Product])
+def get_products_by_category(category: str):
+    supabase = get_supabase_client()
+    res = supabase.table("products").select("*").eq("category", category).execute()
+    return [
+        Product(
+            id=item.get("id"),
+            title=str(item.get("title", "")),
+            price=float(item.get("price") or 0.0),
+            description=str(item.get("description") or ""),
+            category=str(item.get("category", "")),
+            image=str(item.get("image") or ""),
+            rating=Rating(
+                rate=float((item.get("rating") or {}).get("rate", item.get("rate", 0.0)) or 0.0),
+                count=int((item.get("rating") or {}).get("count", item.get("count", 0)) or 0),
+            ),
+        )
+        for item in res.data
+    ]
+
 @router.get("/{id}", response_model=Product)
 def get_product(id: int):
     supabase = get_supabase_client()
