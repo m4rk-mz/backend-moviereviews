@@ -22,7 +22,7 @@ def login(request: LoginRequest):
         )
 
     user = users[0]
-    payload = {"sub": user["id"]}
+    payload = {"sub": str(user["id"])}
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
     return LoginResponse(token=token)
